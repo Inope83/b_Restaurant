@@ -1,6 +1,6 @@
 # 🍽️ b_Restaurant — Restaurant Table Reservation System
 
-A full-featured restaurant table reservation and management system built with **Django 4.2.7**.  
+A full-featured restaurant table reservation and management system built with **Django 6.0.3**.  
 Customers can browse tables, make reservations, and track loyalty rewards. Admins manage everything from a central dashboard.
 
 ---
