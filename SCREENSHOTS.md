@@ -1,17 +1,5 @@
 # 📸 Screenshots — b_Restaurant
 
-Visual preview of the b_Restaurant application.
-
-> **Note for contributors:** Replace each placeholder below with an actual screenshot.  
-> Save your screenshots to the `docs/screenshots/` folder, then update the image paths accordingly.
->
-> **How to take screenshots:**
-> 1. Run the project: `python manage.py runserver`
-> 2. Open the page in your browser
-> 3. Press `F11` for fullscreen (recommended)
-> 4. Press `PrtSc` (Windows) or `Shift+Cmd+4` (macOS) or `Shift+PrtSc` (Linux)
-> 5. Save to `docs/screenshots/` with the filename listed below
-
 ---
 
 ## 🏠 1. Home Page
