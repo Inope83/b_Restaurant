@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rezervasaun {{ booking.reservation_reference }} - Jestaun Restaurante{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Inísiu</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'rooms:my_bookings' %}">Ha'u-nia Rezervasaun</a></li>
+                    <li class="breadcrumb-item active">{{ booking.reservation_reference }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Booking Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="mb-2">Konfirmasaun Rezervasaun</h1>
+                            <p class="text-muted mb-3">Referénsia: <strong>{{ booking.reservation_reference }}</strong></p>
+                            <div class="d-flex gap-3">
+                                <span class="badge status-{{ booking.status }} fs-6">
+                                    {{ booking.get_status_display }}
+                                </span>
+                                <span class="badge bg-{{ booking.payment_status|yesno:'success,warning' }} fs-6">
+                                    Pagamentu: {{ booking.get_payment_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="h3 text-success mb-2">${{ booking.final_amount }}</div>
+                            <small class="text-muted">Montante Totál</small>
+                            <div class="mt-3">
+                                {% if booking.status in 'pending,confirmed' and booking.reservation_date > today %}
+                                    <a href="{% url 'rooms:cancel_booking' booking.id %}" 
+                                       class="btn btn-outline-danger"
+                                       onclick="return confirm('Ita-boot si\'ik atu kansela rezervasaun ida ne\'e?')">
+                                        <i class="bi bi-x-circle"></i> Kansela Rezervasaun
+                                    </a>
+                                {% endif %}
+                                <button class="btn btn-outline-primary" onclick="window.print()">
+                                    <i class="bi bi-printer"></i> Imprime
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Booking Details -->
+        <div class="col-lg-8">
+            <!-- Table Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-table"></i> Informasaun Meza
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if booking.table.images.first %}
+                                <img src="{{ booking.table.images.first.image.url }}" 
+                                     class="img-fluid rounded" alt="Table {{ booking.table.table_number }}"
+                                     style="height: 200px; width: 100%; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                     style="height: 200px;">
+                                    <i class="bi bi-table text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h4>Meza {{ booking.table.table_number }}</h4>
+                            <p class="text-muted mb-3">{{ booking.table.table_type.name }}</p>
+                            <p>{{ booking.table.description|default:"Meza konfortável ho servisu exelente." }}</p>
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="border rounded p-3 text-center">
+                                        <i class="bi bi-geo-alt text-primary fs-4"></i>
+                                        <div class="mt-2">
+                                            <strong>{{ booking.table.location }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="border rounded p-3 text-center">
+                                        <i class="bi bi-people text-primary fs-4"></i>
+                                        <div class="mt-2">
+                                            <strong>Máximu Ema Na'in {{ booking.table.table_type.max_capacity }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reservation Details -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-event"></i> Detallu Rezervasaun
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Data Rezervasaun</label>
+                                <div class="h5">{{ booking.reservation_date|date:"l, F d, Y" }}</div>
+                                <small class="text-muted">{{ booking.reservation_time|time:"g:i A" }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Oras Remata Estimadu</label>
+                                <div class="h5">{{ booking.end_time|time:"g:i A" }}</div>
+                                <small class="text-muted">Durasaun aproximadu</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Durasaun</label>
+                                <div class="h5">{{ booking.duration_hours|floatformat:1 }} Oras</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Ema Na'in Hira</label>
+                                <div class="h5">{{ booking.party_size }} Konvidadu</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if booking.special_requests %}
+                        <div class="border-top pt-3 mt-3">
+                            <label class="form-label text-muted">Pedidu Espesiál</label>
+                            <p class="mb-0">{{ booking.special_requests }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Guest Information -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person"></i> Informasaun Konvidadu
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Naran</label>
+                                <div class="h6">{{ booking.user.get_full_name|default:booking.user.username }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">E-mail</label>
+                                <div class="h6">{{ booking.user.email }}</div>
+                            </div>
+                        </div>
+                        {% if booking.contact_phone %}
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Telefone</label>
+                                    <div class="h6">{{ booking.contact_phone }}</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Nível Membru</label>
+                                <div>
+                                    <span class="badge level-{{ booking.user.advantage_level }}">
+                                        {{ booking.user.get_advantage_level_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Summary -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 100px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-receipt"></i> Rezumu Rezervasaun
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Room Information -->
+                    <div class="mb-3">
+                        <h6 class="mb-2">Meza</h6>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Meza {{ booking.table.table_number }}</span>
+                            <span>{{ booking.table.table_type.name }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Fatin</span>
+                            <span>{{ booking.table.location }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Guest Information -->
+                    <div class="mb-3 border-top pt-3">
+                        <h6 class="mb-2">Informasaun Konvidadu</h6>
+                        <div class="mb-1">
+                            <strong>Naran:</strong> {{ booking.user.get_full_name|default:booking.user.username }}
+                        </div>
+                        <div class="mb-2">
+                            <strong>E-mail:</strong> {{ booking.user.email }}
+                        </div>
+                    </div>
+
+                    <!-- Membership Benefits -->
+                    <div class="mb-3 border-top pt-3">
+                        <h6 class="mb-2">Benefísiu Membru</h6>
+                        <div class="d-flex justify-content-between">
+                            <span>Nível:</span>
+                            <span class="badge level-{{ booking.user.advantage_level }}">
+                                <strong>{{ booking.user.get_advantage_level_display }}</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Price Breakdown -->
+                    <div class="mb-3 border-top pt-3">
+                        <h6 class="mb-2">Detallu Presu</h6>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Taxa Rezervasaun:</span>
+                            <span>${{ booking.table.reservation_fee }}</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Durasaun:</span>
+                            <span>{{ booking.duration_hours|floatformat:0 }} oras</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Sub-totál:</span>
+                            <span>${{ booking.total_amount }}</span>
+                        </div>
+                        
+                        {% if booking.discount_amount > 0 %}
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>Deskonto ({{ booking.user.get_advantage_level_display }}):</span>
+                            <span>-${{ booking.discount_amount }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="border-top pt-2">
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span><strong>Montante Totál:</strong></span>
+                                <span class="text-success"><strong>${{ booking.final_amount }}</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terms & Conditions -->
+                    <div class="mb-3 border-top pt-3">
+                        <h6 class="mb-2">Termus & Kondisaun</h6>
+                        <ul class="small text-muted mb-0 ps-3">
+                            <li>Oras rezervasaun: {{ booking.reservation_time|time:"g:i A" }}</li>
+                            <li>Oras remata estimadu: {{ booking.end_time|time:"g:i A" }}</li>
+                            <li>Kanselamentu bele halo to'o oras 2 antes rezervasaun</li>
+                            <li>Presiza ID válidu bainhira to'o</li>
+                            <li>Labele fuma iha área han</li>
+                        </ul>
+                    </div>
+
+                    <!-- Booking Information -->
+                    <div class="border-top pt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Data Rezerva:</span>
+                            <span>{{ booking.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Referénsia:</span>
+                            <span class="font-monospace">{{ booking.reservation_reference }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Estadu:</span>
+                            <span class="badge status-{{ booking.status }}">
+                                {{ booking.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Pagamentu:</span>
+                            <span class="badge bg-{{ booking.payment_status|yesno:'success,warning' }}">
+                                {{ booking.get_payment_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="border-top pt-3 mt-3">
+                        <h6>Presiza Ajuda?</h6>
+                        <p class="small text-muted mb-2">
+                            Kontaktu ami-nia servisu kliente ba pergunta ruma kona-ba ita-nia rezervasaun.
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="tel:+1234567890" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-telephone"></i> Telefona Mai
+                            </a>
+                            <a href="mailto:support@restaurant.com" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-envelope"></i> Suporta E-mail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

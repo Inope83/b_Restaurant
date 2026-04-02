@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ha'u-nia Rezervasaun - Jestaun Restaurante{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-1">Ha'u-nia Rezervasaun</h1>
+                    <p class="text-muted">Jere ita-nia rezervasaun restaurante</p>
+                </div>
+                <a href="{% url 'rooms:room_list' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle"></i> Rezervasaun Foun
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bookings List -->
+    <div class="row">
+        <div class="col-12">
+            {% if page_obj %}
+                {% for booking in page_obj %}
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    {% if booking.table.images.first %}
+                                        <img src="{{ booking.table.images.first.image.url }}" 
+                                             class="img-fluid rounded" alt="Meza {{ booking.table.table_number }}"
+                                             style="height: 80px; width: 100%; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                             style="height: 80px;">
+                                            <i class="bi bi-table text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <h5 class="mb-1">Meza {{ booking.table.table_number }}</h5>
+                                    <p class="text-muted mb-1">{{ booking.table.table_type.name }}</p>
+                                    <small class="text-muted">Fatin: {{ booking.table.location }}</small>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="mb-1">
+                                        <i class="bi bi-calendar-event text-primary"></i>
+                                        <strong>{{ booking.reservation_date|date:"M d, Y" }}</strong>
+                                    </div>
+                                    <div class="mb-1">
+                                        <i class="bi bi-clock text-info"></i>
+                                        <strong>{{ booking.reservation_time|time:"H:i" }}</strong>
+                                    </div>
+                                    <small class="text-muted">{{ booking.duration_hours|floatformat:1 }} oras rezervasaun</small>
+                                </div>
+                                
+                                <div class="col-md-2 text-center">
+                                    <div class="mb-2">
+                                        <span class="badge status-{{ booking.status }} fs-6">
+                                            {{ booking.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <span class="badge bg-{{ booking.payment_status|yesno:'success,warning' }}">
+                                            {{ booking.get_payment_status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="h5 text-success mb-0">${{ booking.final_amount }}</div>
+                                    {% if booking.discount_amount > 0 %}
+                                        <small class="text-muted">
+                                            <s>${{ booking.total_amount }}</s> 
+                                            <span class="text-success">Rai ${{ booking.discount_amount }}</span>
+                                        </small>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-2 text-end">
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-primary dropdown-toggle" type="button" 
+                                                data-bs-toggle="dropdown">
+                                            Asaun
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'rooms:booking_detail' booking.id %}">
+                                                    <i class="bi bi-eye"></i> Haree Detallu
+                                                </a>
+                                            </li>
+                                            {% if booking.status in 'pending,confirmed' and booking.reservation_date > today %}
+                                                <li>
+                                                    <a class="dropdown-item text-danger" 
+                                                       href="{% url 'rooms:cancel_booking' booking.id %}"
+                                                       onclick="return confirm('Ita-boot si\'ik atu kansela rezervasaun ida ne\'e?')">
+                                                        <i class="bi bi-x-circle"></i> Kansela Rezervasaun
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                            <li>
+                                                <a class="dropdown-item" href="#"
+                                                   onclick="copyToClipboard('{{ booking.reservation_reference }}')">
+                                                    <i class="bi bi-clipboard"></i> Kopia Referénsia
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Booking Details -->
+                            <div class="row mt-3 pt-3 border-top">
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <strong>Referénsia Rezervasaun:</strong> {{ booking.reservation_reference }}
+                                    </small>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <small class="text-muted">
+                                        <strong>Rezerva iha:</strong> {{ booking.created_at|date:"M d, Y" }}
+                                    </small>
+                                </div>
+                                {% if booking.special_requests %}
+                                    <div class="col-12 mt-2">
+                                        <small class="text-muted">
+                                            <strong>Pedidu Espesiál:</strong> {{ booking.special_requests }}
+                                        </small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <nav aria-label="Bookings pagination">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1">
+                                                <i class="bi bi-chevron-double-left"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    <li class="page-item active">
+                                        <span class="page-link">
+                                            Pájina {{ page_obj.number }} husi {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+                                    
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                                <i class="bi bi-chevron-double-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <!-- No Bookings -->
+                <div class="text-center py-5">
+                    <i class="bi bi-calendar-x text-muted" style="font-size: 5rem;"></i>
+                    <h3 class="mt-4 text-muted">Seidauk Iha Rezervasaun</h3>
+                    <p class="text-muted mb-4">Ita-boot seidauk halo rezervasaun ruma. Hahú esplora ami-nia meza sira!</p>
+                    <a href="{% url 'rooms:room_list' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-search"></i> Esplora Meza Sira
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

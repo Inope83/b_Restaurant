@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rezerva Meza {{ room.table_number }} - Jestaun Restaurante{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Inísiu</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'rooms:room_list' %}">Meza sira</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'rooms:room_detail' room.id %}">Meza {{ room.table_number }}</a></li>
+                    <li class="breadcrumb-item active">Rezerva Meza</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Reservation Form -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-calendar-check"></i> Rezerva Meza {{ room.table_number }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.reservation_date.id_for_label }}" class="form-label">
+                                    <i class="bi bi-calendar"></i> Data Rezervasaun
+                                </label>
+                                {{ form.reservation_date }}
+                                {% if form.reservation_date.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.reservation_date.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.reservation_time.id_for_label }}" class="form-label">
+                                    <i class="bi bi-clock"></i> Oras Rezervasaun
+                                </label>
+                                {{ form.reservation_time }}
+                                {% if form.reservation_time.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.reservation_time.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.party_size.id_for_label }}" class="form-label">
+                                    <i class="bi bi-people"></i> Ema Na'in Hira
+                                </label>
+                                {{ form.party_size }}
+                                {% if form.party_size.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.party_size.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Másimu ema na'in {{ room.table_type.max_capacity }} ba tipu meza ida ne'e
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.special_requests.id_for_label }}" class="form-label">
+                                <i class="bi bi-chat-text"></i> Pedidu Espesiál (Opsionál)
+                            </label>
+                            {{ form.special_requests }}
+                            {% if form.special_requests.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.special_requests.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Restrisaun ai-han, okaziaun espesiál, nesesidade asesibilidade, nst.
+                            </small>
+                        </div>
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'rooms:room_detail' room.id %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Fila ba Meza
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Konfirma Rezervasaun
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reservation Summary -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 100px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-receipt"></i> Rezumu Rezervasaun
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Table Details -->
+                    <div class="mb-3">
+                        {% if room.images.first %}
+                            <img src="{{ room.images.first.image.url }}" class="img-fluid rounded mb-3" 
+                                 alt="Table {{ room.table_number }}" style="height: 150px; width: 100%; object-fit: cover;">
+                        {% endif %}
+                        <h6 class="fw-bold">Meza {{ room.table_number }}</h6>
+                        <p class="text-muted mb-1">{{ room.table_type.name }}</p>
+                        <p class="text-muted mb-0">{{ room.location }}</p>
+                        <p class="text-muted mb-0">Máximu ema na'in {{ room.table_type.max_capacity }}</p>
+                    </div>
+
+                    <!-- Guest Information -->
+                    <div class="mb-3 border-top pt-3">
+                        <h6 class="fw-bold">Informasaun Konvidadu</h6>
+                        <div class="d-flex justify-content-between">
+                            <span>Naran:</span>
+                            <span>{{ user.get_full_name|default:user.username }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>E-mail:</span>
+                            <span>{{ user.email }}</span>
+                        </div>
+                        {% if user.phone %}
+                            <div class="d-flex justify-content-between">
+                                <span>Phone:</span>
+                                <span>{{ user.phone }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Membership Benefits -->
+                    <div class="mb-3 border-top pt-3">
+                        <h6 class="fw-bold">Benefísiu Membru</h6>
+                        <div class="d-flex justify-content-between">
+                            <span>Nível:</span>
+                            <span class="badge level-{{ user.advantage_level }}">
+                                {{ user.get_advantage_level_display }}
+                            </span>
+                        </div>
+                        {% if user.get_discount_percentage > 0 %}
+                            <div class="d-flex justify-content-between text-success">
+                                <span>Deskonto:</span>
+                                <span>{{ user.get_discount_percentage }}%</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Price Calculation -->
+                    <div id="price-calculation" class="border-top pt-3">
+                        <h6 class="fw-bold">Detallu Presu</h6>
+                        <div class="d-flex justify-content-between">
+                            <span>Taxa Rezervasaun:</span>
+                            <span>${{ room.reservation_fee }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Durasaun:</span>
+                            <span>Oras 2 (padraun)</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Sub-totál:</span>
+                            <span id="subtotal-amount">${{ room.reservation_fee }}</span>
+                        </div>
+                        {% if user.get_discount_percentage > 0 %}
+                            <div class="d-flex justify-content-between text-success" id="discount-display">
+                                <span>Deskonto ({{ user.get_discount_percentage }}%):</span>
+                                <span id="discount-amount">
+                                    {% widthratio room.reservation_fee 100 user.get_discount_percentage as discount_amount %}
+                                    -${{ discount_amount|floatformat:2 }}
+                                </span>
+                            </div>
+                        {% endif %}
+                        <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2" id="total-display">
+                            <span><strong>Montante Totál:</strong></span>
+                            <span id="total-amount" class="text-primary">
+                                {% if user.get_discount_percentage > 0 %}
+                                    {% widthratio room.reservation_fee 100 user.get_discount_percentage as discount_amount %}
+                                    {% widthratio room.reservation_fee 1 1 as base_amount %}
+                                    ${{ base_amount|add:"-"|add:discount_amount|floatformat:2 }}
+                                {% else %}
+                                    <strong>${{ room.reservation_fee }}</strong>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="fw-bold">Termus & Kondisaun</h6>
+                        <ul class="small text-muted">
+                            <li>Oras rezervasaun: Tuir hili iha leten</li>
+                            <li>Durasaun padraun: Oras 2</li>
+                            <li>Kanselamentu bele halo to'o oras 2 antes rezervasaun</li>
+                            <li>Presiza ID válidu bainhira to'o</li>
+                            <li>Labele fuma iha área han</li>
+                            <li>Atrasu bele rezulta meza fó ba ema seluk</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden data for JavaScript -->
+<div id="table-data" 
+     data-reservation-fee="{{ room.reservation_fee }}" 
+     data-discount="{{ user.get_discount_percentage|default:0 }}"
+     style="display: none;"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reservationDateInput = document.querySelector('input[name="reservation_date"]');
+    const reservationTimeInput = document.querySelector('input[name="reservation_time"]');
+    const partySizeInput = document.querySelector('input[name="party_size"]');
+    
+    function calculateReservationPrice() {
+        const tableData = document.getElementById('table-data');
+        const reservationFee = parseFloat(tableData.dataset.reservationFee);
+        const discountPercentage = parseFloat(tableData.dataset.discount);
+        
+        if (reservationFee) {
+            const subtotal = reservationFee;
+            const discount = subtotal * (discountPercentage / 100);
+            const total = subtotal - discount;
+            
+            // Update display
+            document.getElementById('subtotal-amount').textContent = '$' + subtotal.toFixed(2);
+            document.getElementById('total-amount').innerHTML = '<strong>$' + total.toFixed(2) + '</strong>';
+            
+            if (discountPercentage > 0) {
+                const discountElement = document.getElementById('discount-amount');
+                if (discountElement) {
+                    discountElement.textContent = '-$' + discount.toFixed(2);
+                }
+            }
+        }
+    }
+    
+    // Calculate price when form changes
+    if (reservationDateInput) {
+        reservationDateInput.addEventListener('change', calculateReservationPrice);
+    }
+    if (reservationTimeInput) {
+        reservationTimeInput.addEventListener('change', calculateReservationPrice);
+    }
+    if (partySizeInput) {
+        partySizeInput.addEventListener('change', calculateReservationPrice);
+    }
+    
+    // Initial calculation
+    calculateReservationPrice();
+    
+    // Form validation
+    const form = document.querySelector('.needs-validation');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    }
+});
+</script>
+{% endblock %}

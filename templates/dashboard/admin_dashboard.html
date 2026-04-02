@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Administradór - Rezervasaun Restaurante{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-1">Dashboard Administradór Restaurante</h1>
+                    <p class="text-muted">Bem-vindu fila-fali, {{ user.get_full_name|default:user.username }}</p>
+                </div>
+                <div>
+                    <a href="/admin/" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-gear"></i> Admin Django
+                    </a>
+                    <a href="{% url 'rooms:room_list' %}" class="btn btn-primary">
+                        <i class="bi bi-eye"></i> Haree Sítio
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-5">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card stat-card text-white h-100" style="background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-uppercase mb-1">Meza Totál</h6>
+                            <h2 class="mb-0">{{ total_tables }}</h2>
+                            <small>{{ available_tables }} disponível</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-table"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card stat-card text-white h-100" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-uppercase mb-1">Rezervasaun Totál</h6>
+                            <h2 class="mb-0">{{ total_reservations }}</h2>
+                            <small>Husi tempu hotu</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card stat-card text-white h-100" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-uppercase mb-1">Rendimentu Totál</h6>
+                            <h2 class="mb-0">${{ total_revenue|floatformat:0 }}</h2>
+                            <small>${{ monthly_revenue|floatformat:0 }} fulan ida ne'e</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card stat-card text-white h-100" style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-uppercase mb-1">Kliente sira</h6>
+                            <h2 class="mb-0">{{ total_customers }}</h2>
+                            <small>Uza-na'in rejistadu</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-people"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Reservations -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Rezervasaun Foin Lalais
+                    </h5>
+                    <a href="/admin/rooms/reservation/" class="btn btn-sm btn-outline-primary">
+                        Haree Hotu
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_reservations %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Referénsia</th>
+                                        <th>Kliente</th>
+                                        <th>Meza</th>
+                                        <th>Data & Oras</th>
+                                        <th>Estadu</th>
+                                        <th>Montante</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for reservation in recent_reservations %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ reservation.reservation_reference }}</strong>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ reservation.user.get_full_name|default:reservation.user.username }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">{{ reservation.user.email }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-light text-dark">
+                                                    Meza {{ reservation.table.table_number }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    {{ reservation.reservation_date|date:"M d, Y" }}
+                                                    <br>
+                                                    <small class="text-muted">{{ reservation.reservation_time|time:"g:i A" }} - {{ reservation.party_size }} ema</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge status-{{ reservation.status }}">
+                                                    {{ reservation.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <strong class="text-success">${{ reservation.final_amount }}</strong>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2">Laiha rezervasaun foin lalais</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart"></i> Estatístika Lalais
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Occupancy Rate -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Taxa Okupasaun</span>
+                            <strong>{{ occupancy_rate }}%</strong>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" style="width: {{ occupancy_rate }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Reservation Status Distribution -->
+                    <div class="mb-4">
+                        <h6>Estadu Rezervasaun</h6>
+                        {% for stat in reservation_stats %}
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-capitalize">{{ stat.status }}</span>
+                                <span class="badge status-{{ stat.status }}">{{ stat.count }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Customer Levels -->
+                    <div>
+                        <h6>Nível Kliente</h6>
+                        {% for level in customer_levels %}
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-capitalize">{{ level.advantage_level }}</span>
+                                <span class="badge level-{{ level.advantage_level }}">{{ level.count }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Popular Table Types -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-star"></i> Tipu Meza Popular
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if popular_table_types %}
+                        {% for table_type in popular_table_types %}
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-1">{{ table_type.name }}</h6>
+                                    <small class="text-muted">${{ table_type.base_price }} taxa rezervasaun</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-primary">{{ table_type.reservation_count }} rezervasaun</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="bi bi-graph-up text-muted" style="font-size: 2rem;"></i>
+                            <p class="text-muted mt-2">Laiha dadus rezervasaun</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning"></i> Asaun Lalais
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <a href="/admin/rooms/table/add/" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                                <i class="bi bi-plus-circle mb-2" style="font-size: 1.5rem;"></i>
+                                <span>Aumenta Meza</span>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="/admin/rooms/tabletype/add/" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                                <i class="bi bi-table mb-2" style="font-size: 1.5rem;"></i>
+                                <span>Aumenta Tipu Meza</span>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="/admin/rooms/reservation/" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                                <i class="bi bi-calendar-check mb-2" style="font-size: 1.5rem;"></i>
+                                <span>Jere Rezervasaun</span>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="/admin/accounts/user/" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                                <i class="bi bi-people mb-2" style="font-size: 1.5rem;"></i>
+                                <span>Jere Uza-na'in</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Chart Placeholder -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up"></i> Revizaun Rendimentu
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center py-5">
+                        <i class="bi bi-bar-chart text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="mt-3 text-muted">Gráfiku Rendimentu</h4>
+                        <p class="text-muted">Integrasaun gráfiku bele aumenta ho Chart.js ka biblioteka hanesan</p>
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="border rounded p-3">
+                                    <h5 class="text-primary">${{ total_revenue|floatformat:0 }}</h5>
+                                    <small class="text-muted">Rendimentu Totál</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border rounded p-3">
+                                    <h5 class="text-success">${{ monthly_revenue|floatformat:0 }}</h5>
+                                    <small class="text-muted">Fulan Ida Ne'e</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border rounded p-3">
+                                    <h5 class="text-info">{{ total_reservations }}</h5>
+                                    <small class="text-muted">Rezervasaun Totál</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

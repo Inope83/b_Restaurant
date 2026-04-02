@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Meza {{ room.table_number }} - Rezervasaun Restaurante{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Table Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Inísiu</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'rooms:room_list' %}">Meza sira</a></li>
+                    <li class="breadcrumb-item active">Meza {{ room.table_number }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Table Images -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    {% if images %}
+                        <div id="tableCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                {% for image in images %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                        <img src="{{ image.image.url }}" class="d-block w-100" 
+                                             alt="{{ image.caption }}" style="height: 400px; object-fit: cover;"
+                                             onclick="openImageModal('{{ image.image.url }}', '{{ image.caption }}')">
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% if images.count > 1 %}
+                                <button class="carousel-control-prev" type="button" data-bs-target="#tableCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#tableCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        {% if 'Intimate Booth' in room.table_type.name %}
+                            <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="img-fluid w-100" alt="Intimate Booth {{ room.table_number }}" style="height: 400px; object-fit: cover;">
+                        {% elif 'Family' in room.table_type.name %}
+                            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="img-fluid w-100" alt="Family Table {{ room.table_number }}" style="height: 400px; object-fit: cover;">
+                        {% elif 'Chef' in room.table_type.name %}
+                            <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="img-fluid w-100" alt="Chef's Counter {{ room.table_number }}" style="height: 400px; object-fit: cover;">
+                        {% elif 'Outdoor' in room.table_type.name or 'Patio' in room.table_type.name %}
+                            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="img-fluid w-100" alt="Outdoor Table {{ room.table_number }}" style="height: 400px; object-fit: cover;">
+                        {% elif 'Private' in room.table_type.name %}
+                            <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="img-fluid w-100" alt="Private Dining {{ room.table_number }}" style="height: 400px; object-fit: cover;">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="img-fluid w-100" alt="Dining Table {{ room.table_number }}" style="height: 400px; object-fit: cover;">
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Table Details -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h2 class="card-title">Meza {{ room.table_number }}</h2>
+                    <p class="text-muted mb-3">{{ room.table_type.name }}</p>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="bi bi-geo-alt text-primary fs-4"></i>
+                                <div class="mt-2">
+                                    <strong>{{ room.location }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="bi bi-people text-primary fs-4"></i>
+                                <div class="mt-2">
+                                    <strong>Ema Na'in {{ room.table_type.max_capacity }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="bi bi-currency-dollar text-primary fs-4"></i>
+                                <div class="mt-2">
+                                    <strong>Taxa ${{ room.reservation_fee }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="bi bi-check-circle text-success fs-4"></i>
+                                <div class="mt-2">
+                                    <strong>{{ room.get_status_display }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5>Deskrisaun</h5>
+                    <p>{{ room.description|default:"Meza konfortável ida ne'e oferese esperiénsia han ne'ebé di'ak tebes ho servisu exelente." }}</p>
+
+                    <h5>Detallu Tipu Meza</h5>
+                    <p>{{ room.table_type.description }}</p>
+
+                    <h5>Karakterístika</h5>
+                    <div class="row">
+                        {% if room.table_type.features %}
+                            <div class="col-12">
+                                <p><i class="bi bi-check-circle text-success"></i> {{ room.table_type.features }}</p>
+                            </div>
+                        {% else %}
+                            <div class="col-12">
+                                <p class="text-muted">Inklui ona karakterístika meza padraun</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reservation Panel -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 100px;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-check"></i> Rezerva Meza Ida Ne'e
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span class="h3 text-primary">${{ room.reservation_fee }}</span>
+                        <span class="text-muted"> taxa rezervasaun</span>
+                    </div>
+
+                    {% if user.is_authenticated %}
+                        {% if user.get_discount_percentage > 0 %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-percent"></i> 
+                                Ita-boot hetan deskontu {{ user.get_discount_percentage }}% nu'udar membru {{ user.get_advantage_level_display }}!
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <form id="availability-form" class="mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="table_id" value="{{ room.id }}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Data Rezervasaun</label>
+                            <input type="date" name="reservation_date" class="form-control" 
+                                   min="{{ today|date:'Y-m-d' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Oras Rezervasaun</label>
+                            <select name="reservation_time" class="form-control" required>
+                                <option value="">Hili Oras</option>
+                                <option value="17:00">5:00 PM</option>
+                                <option value="17:30">5:30 PM</option>
+                                <option value="18:00">6:00 PM</option>
+                                <option value="18:30">6:30 PM</option>
+                                <option value="19:00">7:00 PM</option>
+                                <option value="19:30">7:30 PM</option>
+                                <option value="20:00">8:00 PM</option>
+                                <option value="20:30">8:30 PM</option>
+                                <option value="21:00">9:00 PM</option>
+                                <option value="21:30">9:30 PM</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Ema Na'in Hira</label>
+                            <select name="party_size" class="form-control" required>
+                                {% for i in "123456789"|make_list %}
+                                    {% if forloop.counter <= room.table_type.max_capacity %}
+                                        <option value="{{ forloop.counter }}">{{ forloop.counter }} Ema</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-search"></i> Verifika Disponibilidade
+                        </button>
+                    </form>
+
+                    <div id="availability-result"></div>
+
+                    <div id="price-breakdown" class="mb-3">
+                        <div class="border-top pt-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Taxa Rezervasaun:</span>
+                                <span id="subtotal-amount">${{ room.reservation_fee }}</span>
+                            </div>
+                            {% if user.is_authenticated and user.get_discount_percentage > 0 %}
+                                <div class="d-flex justify-content-between text-success">
+                                    <span>Deskonto ({{ user.get_discount_percentage }}%):</span>
+                                    <span id="discount-amount">-${% widthratio room.reservation_fee 100 user.get_discount_percentage %}</span>
+                                </div>
+                                <div class="d-flex justify-content-between fw-bold border-top pt-2">
+                                    <span>Totál:</span>
+                                    <span id="total-amount">${{ room.reservation_fee|floatformat:2 }}</span>
+                                </div>
+                            {% else %}
+                                <div class="d-flex justify-content-between fw-bold border-top pt-2">
+                                    <span>Totál:</span>
+                                    <span id="total-amount">${{ room.reservation_fee }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated %}
+                        {% if room.status == 'available' %}
+                            <a href="{% url 'rooms:book_room' room.id %}" 
+                               class="btn btn-primary w-100" id="book-button">
+                                <i class="bi bi-calendar-check"></i> Rezerva Agora
+                            </a>
+                        {% else %}
+                            <button class="btn btn-secondary w-100" disabled>
+                                <i class="bi bi-x-circle"></i> La Disponível
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}?next={% url 'rooms:book_room' room.id %}" 
+                           class="btn btn-primary w-100">
+                            <i class="bi bi-box-arrow-in-right"></i> Login atu Rezerva
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Table Information -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Informasaun Meza
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Númeru Meza:</span>
+                        <strong>{{ room.table_number }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Fatin:</span>
+                        <strong>{{ room.location }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Estadu:</span>
+                        <span class="badge bg-{% if room.status == 'available' %}success{% else %}warning{% endif %}">
+                            {{ room.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Kapasidade Másima:</span>
+                        <strong>{{ room.table_type.max_capacity }} ema</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Similar Tables -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-4">Meza sira ne'ebé Hanesan</h3>
+            <div class="row">
+                {% for similar_table in room.table_type.tables.all|slice:":3" %}
+                    {% if similar_table.id != room.id %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                {% if similar_table.images.first %}
+                                    <img src="{{ similar_table.images.first.image.url }}" class="card-img-top" 
+                                         alt="Table {{ similar_table.table_number }}" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    {% if 'Intimate Booth' in similar_table.table_type.name %}
+                                        <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                             class="card-img-top" alt="Intimate Booth {{ similar_table.table_number }}" style="height: 200px; object-fit: cover;">
+                                    {% elif 'Family' in similar_table.table_type.name %}
+                                        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                             class="card-img-top" alt="Family Table {{ similar_table.table_number }}" style="height: 200px; object-fit: cover;">
+                                    {% elif 'Chef' in similar_table.table_type.name %}
+                                        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                             class="card-img-top" alt="Chef's Counter {{ similar_table.table_number }}" style="height: 200px; object-fit: cover;">
+                                    {% elif 'Outdoor' in similar_table.table_type.name or 'Patio' in similar_table.table_type.name %}
+                                        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                             class="card-img-top" alt="Outdoor Table {{ similar_table.table_number }}" style="height: 200px; object-fit: cover;">
+                                    {% elif 'Private' in similar_table.table_type.name %}
+                                        <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                             class="card-img-top" alt="Private Dining {{ similar_table.table_number }}" style="height: 200px; object-fit: cover;">
+                                    {% else %}
+                                        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                             class="card-img-top" alt="Dining Table {{ similar_table.table_number }}" style="height: 200px; object-fit: cover;">
+                                    {% endif %}
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">Meza {{ similar_table.table_number }}</h5>
+                                    <p class="text-muted">{{ similar_table.table_type.name }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="h5 text-primary mb-0">${{ similar_table.reservation_fee }}</span>
+                                        <span class="badge bg-{% if similar_table.status == 'available' %}success{% else %}warning{% endif %}">
+                                            {{ similar_table.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <a href="{% url 'rooms:room_detail' similar_table.id %}" class="btn btn-outline-primary w-100">
+                                        Haree Detallu
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="reservation-fee" data-fee="{{ room.reservation_fee }}" style="display: none;"></div>
+{% if user.is_authenticated %}
+    <div id="discount-percentage" data-discount="{{ user.get_discount_percentage }}" style="display: none;"></div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Availability check functionality can be added here
+    const form = document.getElementById('availability-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Add AJAX availability check here if needed
+        });
+    }
+});
+</script>
+{% endblock %}

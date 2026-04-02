@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Rezervasaun Restaurante{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Welcome Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="profile-header text-center">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="Profile" class="profile-avatar">
+                        {% else %}
+                            <div class="profile-avatar bg-light d-flex align-items-center justify-content-center">
+                                <i class="bi bi-person-fill text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-9 text-md-start">
+                        <h1 class="mb-2">Bem-vindu fila-fali, {{ user.first_name|default:user.username }}!</h1>
+                        <div class="row text-center text-md-start">
+                            <div class="col-md-4">
+                                <div class="mb-2">
+                                    <i class="bi bi-calendar-check"></i> Rezervasaun Totál
+                                </div>
+                                <div class="h4">{{ total_reservations }}</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-2">
+                                    <i class="bi bi-currency-dollar"></i> Gasta Totál
+                                </div>
+                                <div class="h4">${{ total_spent|floatformat:2 }}</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-2">
+                                    <i class="bi bi-percent"></i> Taxa Deskonto
+                                </div>
+                                <div class="h4">{{ user.get_discount_percentage }}%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="mb-4">Asaun Lalais</h3>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <a href="{% url 'rooms:room_list' %}" class="btn btn-primary btn-lg w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                        <i class="bi bi-search mb-2" style="font-size: 2rem;"></i>
+                        <span>Esplora Meza Sira</span>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a href="{% url 'rooms:my_bookings' %}" class="btn btn-outline-primary btn-lg w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                        <i class="bi bi-calendar-check mb-2" style="font-size: 2rem;"></i>
+                        <span>Ha'u-nia Rezervasaun</span>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary btn-lg w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                        <i class="bi bi-person mb-2" style="font-size: 2rem;"></i>
+                        <span>Edita Perfil</span>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a href="{% url 'dashboard:home' %}" class="btn btn-outline-primary btn-lg w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                        <i class="bi bi-house mb-2" style="font-size: 2rem;"></i>
+                        <span>Inísiu</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Upcoming Reservations -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-event"></i> Rezervasaun Tuir Mai
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_reservations %}
+                        {% for reservation in upcoming_reservations %}
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                <div>
+                                    <h6 class="mb-1">Meza {{ reservation.table.table_number }}</h6>
+                                    <small class="text-muted">
+                                        {{ reservation.reservation_date|date:"M d, Y" }} iha {{ reservation.reservation_time|time:"g:i A" }}
+                                    </small>
+                                    <br>
+                                    <span class="badge bg-{% if reservation.status == 'confirmed' %}success{% else %}warning{% endif %}">
+                                        {{ reservation.get_status_display }}
+                                    </span>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-primary">${{ reservation.final_amount }}</div>
+                                    <small class="text-muted">Ema na'in {{ reservation.party_size }}</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2">Laiha rezervasaun tuir mai</p>
+                            <a href="{% url 'rooms:room_list' %}" class="btn btn-primary">
+                                Rezerva Meza Ida
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if upcoming_reservations %}
+                    <div class="card-footer">
+                        <a href="{% url 'rooms:my_bookings' %}" class="btn btn-outline-primary w-100">
+                            Haree Rezervasaun Hotu
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Reservations -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Rezervasaun Foin Lalais
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_reservations %}
+                        {% for reservation in recent_reservations %}
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                <div>
+                                    <h6 class="mb-1">Meza {{ reservation.table.table_number }}</h6>
+                                    <small class="text-muted">
+                                        {{ reservation.reservation_date|date:"M d, Y" }} iha {{ reservation.reservation_time|time:"g:i A" }}
+                                    </small>
+                                    <br>
+                                    <span class="badge bg-{% if reservation.status == 'completed' %}success{% else %}warning{% endif %}">
+                                        {{ reservation.get_status_display }}
+                                    </span>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-success">${{ reservation.final_amount }}</div>
+                                    <small class="text-muted">{{ reservation.reservation_reference }}</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-clock text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2">Laiha istória rezervasaun</p>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if recent_reservations %}
+                    <div class="card-footer">
+                        <a href="{% url 'rooms:my_bookings' %}" class="btn btn-outline-success w-100">
+                            Haree Istória Hotu
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #007bff;
+    margin: 0 auto;
+}
+
+.profile-header {
+    background: linear-gradient(135deg,rgb(22, 63, 105) 0%,rgb(14, 16, 19) 100%);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    border: none;
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    opacity: 0.8;
+}
+</style>
+{% endblock %}

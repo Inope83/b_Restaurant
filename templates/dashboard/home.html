@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Restaurant Booking System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Rezerva Ita-nia Meza Perfetu</h1>
+                <p class="lead mb-4">Iha esperiénsia han ne'ebé di'ak ho ami-nia sistema rezervasaun online ne'ebé fasil. Rezerva ita-nia meza sedu no goza benefísiu eskluzivu.</p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'rooms:room_list' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-calendar-check"></i> Rezerva Agora
+                    </a>
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'accounts:register' %}" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-person-plus"></i> Hamutuk ho Ami
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="bi bi-egg-fried" style="font-size: 15rem; opacity: 0.8;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold mb-3">Tanbasá Tenke Hili Ami-nia Restaurante?</h2>
+                <p class="lead text-muted">Deskobre benefísiu sira bainhira han ho ami</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="bi bi-clock" style="font-size: 2rem;"></i>
+                        </div>
+                        <h5 class="card-title">Rezerva ho Fasil</h5>
+                        <p class="card-text text-muted">Rezerva ita-nia meza ho klik de'it. Ami-nia sistema rezervasaun simples halo prosesu ne'e lais no fasil.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-success text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="bi bi-percent" style="font-size: 2rem;"></i>
+                        </div>
+                        <h5 class="card-title">Recompensa Lealdade</h5>
+                        <p class="card-text text-muted">Hetan pontu iha kada rezervasaun no desbloqueia deskontu no benefísiu eskluzivu.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-warning text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="bi bi-star-fill" style="font-size: 2rem;"></i>
+                        </div>
+                        <h5 class="card-title">Esperiénsia Premium</h5>
+                        <p class="card-text text-muted">Goza servisu no ambiénsia exesionál ho ami-nia esperiénsia han ne'ebé prepara ho didi'ak.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Table Types Section -->
+{% if table_types %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold mb-3">Ami-nia Opsaun Meza</h2>
+                <p class="lead text-muted">Hili husi ami-nia variedade arranju tuur nian</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            {% for table_type in table_types %}
+                <div class="col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title">{{ table_type.name }}</h5>
+                                <span class="badge bg-primary fs-6">${{ table_type.base_price }}</span>
+                            </div>
+                            <p class="card-text text-muted mb-3">{{ table_type.description }}</p>
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-people"></i> To'o ema na'in {{ table_type.max_capacity }}
+                                </small>
+                            </div>
+                            <a href="{% url 'rooms:room_list' %}" class="btn btn-outline-primary w-100">
+                                Haree Meza Disponível Sira
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Featured Tables Section -->
+{% if featured_tables %}
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold mb-3">Meza sira ne'ebé Favoritu</h2>
+                <p class="lead text-muted">Opsaun popular husi ami-nia konvidadu sira</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            {% for table in featured_tables %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        {% if table.images.first %}
+                            <img src="{{ table.images.first.image.url }}" class="card-img-top" alt="Table {{ table.table_number }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            {% if 'Intimate Booth' in table.table_type.name %}
+                                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="Intimate Booth {{ table.table_number }}" style="height: 200px; object-fit: cover;">
+                            {% elif 'Family' in table.table_type.name %}
+                                <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="Family Table {{ table.table_number }}" style="height: 200px; object-fit: cover;">
+                            {% elif 'Chef' in table.table_type.name %}
+                                <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="Chef's Counter {{ table.table_number }}" style="height: 200px; object-fit: cover;">
+                            {% elif 'Outdoor' in table.table_type.name or 'Patio' in table.table_type.name %}
+                                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="Outdoor Table {{ table.table_number }}" style="height: 200px; object-fit: cover;">
+                            {% elif 'Private' in table.table_type.name %}
+                                <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="Private Dining {{ table.table_number }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="Dining Table {{ table.table_number }}" style="height: 200px; object-fit: cover;">
+                            {% endif %}
+                        {% endif %}
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title">Table {{ table.table_number }}</h5>
+                                <span class="badge bg-success">{{ table.get_status_display }}</span>
+                            </div>
+                            <p class="card-text">
+                                <strong>{{ table.table_type.name }}</strong><br>
+                                <small class="text-muted">{{ table.location }}</small>
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-primary fw-bold">${{ table.reservation_fee }}</span>
+                                <a href="{% url 'rooms:room_detail' table.id %}" class="btn btn-primary btn-sm">
+                                    Haree Detallu
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'rooms:room_list' %}" class="btn btn-primary btn-lg">
+                Haree Meza Hotu-hotu
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-3">Prontu atu Han ho Ami?</h2>
+                <p class="lead mb-4">Hamutuk ho kliente rihun ne'ebé satisfás no konfia ami-nia sistema rezervasaun ba sira-nia nesesidade han.</p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'rooms:room_list' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-calendar-check"></i> Halo Rezervasaun
+                    </a>
+                {% else %}
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg">
+                            <i class="bi bi-person-plus"></i> Rejista
+                        </a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    min-height: 60vh;
+    display: flex;
+    align-items-center;
+}
+
+.feature-icon {
+    transition: transform 0.3s ease;
+}
+
+.card:hover .feature-icon {
+    transform: scale(1.1);
+}
+
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+}
+</style>
+{% endblock %}
